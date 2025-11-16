@@ -6,6 +6,7 @@ use App\Models\otps;
 use App\Models\PendingRegistration;
 use App\Models\User;
 use App\Models\Wallet;
+use App\Services\ScoreService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
@@ -39,7 +40,7 @@ class AuthController extends Controller
             'password' => Hash::make($data['password']),
         ]);
 
-        // générer OTP  4 chiffres
+        // générer OTP  4 chiffres 
         $otp = rand(1000, 9999);
 
         otps::create([
@@ -134,17 +135,23 @@ class AuthController extends Controller
             ]);
         }
 
+        $pointsAdded = add_score($user, 1, "login");
+
         $token = $user->createToken('mobile')->plainTextToken;
 
         return response()->json([
             'user'  => $user,
             'token' => $token,
+            'points_added' => $pointsAdded,
+
         ]);
     }
 
     public function me(Request $request)
     {
         return response()->json($request->user()->load('wallet'));
+        // this mean
+
     }
 
     public function logout(Request $request)
@@ -152,5 +159,20 @@ class AuthController extends Controller
         $request->user()->currentAccessToken()->delete();
 
         return response()->json(['message' => 'Déconnecté.']);
+    }
+
+
+    public function findByObp($obp_id)
+    {
+        $user = \App\Models\User::where('obp_id', $obp_id)->first();
+
+        if (!$user) {
+            return response()->json(['message' => 'Utilisateur introuvable'], 404);
+        }
+
+        return response()->json([
+            'name' => $user->name,
+            'obp_id' => $user->obp_id,
+        ]);
     }
 }

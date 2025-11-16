@@ -1,0 +1,276 @@
+openapi: 3.0.3
+info:
+  title: ObpPay API
+  description: API officielle d’ObpPay – Auth, Wallet, Transactions & Loan system.
+  version: 1.0.0
+
+servers:
+  - url: http://127.0.0.1:8000/api
+    description: Serveur local de développement
+
+paths:
+
+  /auth/register:
+    post:
+      summary: Start or complete registration
+      description: >
+        Start registration (send OTP) OR complete registration depending on whether "otp" is sent.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                phone: { type: string }
+                password: { type: string }
+                otp: { type: string }
+                obp_id: { type: string }
+      responses:
+        '200':
+          description: Registration step started
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string }
+                  otp_required: { type: boolean }
+                  otp: { type: integer }
+        '201':
+          description: Registration completed successfully
+        '422':
+          description: Validation error
+
+  /auth/login:
+    post:
+      summary: Login user
+      description: Authenticate user with phone + password, returns token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phone: { type: string }
+                password: { type: string }
+      responses:
+        '200':
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    type: object
+                    properties:
+                      id: { type: integer }
+                      name: { type: string }
+                      phone: { type: string }
+                      obp_id: { type: string }
+                  token:
+                    type: string
+        '401':
+          description: Invalid credentials
+
+  /auth/me:
+    get:
+      summary: Get authenticated user
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User profile with wallet
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id: { type: integer }
+                  name: { type: string }
+                  phone: { type: string }
+                  obp_id: { type: string }
+                  wallet:
+                    type: object
+                    properties:
+                      balance: { type: string }
+                      currency: { type: string }
+
+  /auth/logout:
+    post:
+      summary: Logout user
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful logout
+
+  /auth/send-otp:
+    post:
+      summary: Send OTP (for reset or verification)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phone: { type: string }
+      responses:
+        '200':
+          description: OTP sent
+
+  /auth/verify-otp:
+    post:
+      summary: Verify OTP code
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phone: { type: string }
+                code: { type: string }
+      responses:
+        '200':
+          description: OTP verified
+
+  /wallet/balance:
+    get:
+      summary: Get wallet balance
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Current balance
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  balance: { type: string }
+                  currency: { type: string }
+
+  /wallet/transactions:
+    get:
+      summary: List user transactions
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of transactions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id: { type: integer }
+                    type: { type: string }
+                    amount: { type: string }
+                    date: { type: string }
+
+  /wallet/deposit:
+    post:
+      summary: Deposit money
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                amount: { type: number }
+      responses:
+        '200':
+          description: Deposit successful
+
+  /wallet/transfer:
+    post:
+      summary: Transfer funds
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                to: { type: string }
+                amount: { type: number }
+      responses:
+        '200':
+          description: Transfer successful
+
+  /loan/eligibility:
+    get:
+      summary: Check loan eligibility
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Eligibility info
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  eligible: { type: boolean }
+                  score: { type: number }
+
+  /loan/request:
+    post:
+      summary: Request a loan
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                amount: { type: number }
+                duration: { type: number }
+      responses:
+        '200':
+          description: Loan request submitted
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+/user/by-obp/{obp_id}:
+    get:
+      summary: Fetch user by OBP ID
+      parameters:
+        - in: path
+          name: obp_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id: { type: integer }
+                  name: { type: string }
+                  phone: { type: string }
+                  obp_id: { type: string }
+        '404':
+          description: User not found

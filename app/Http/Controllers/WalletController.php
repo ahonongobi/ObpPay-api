@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Transaction;
 use App\Models\Transactions;
+use App\Services\ScoreService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -54,6 +55,10 @@ class WalletController extends Controller
             ]);
         });
 
+        add_score($user, 3, "deposit");
+
+
+
         return response()->json([
             'message' => 'Dépôt effectué.',
             'balance' => $wallet->fresh()->balance,
@@ -65,6 +70,7 @@ class WalletController extends Controller
         $data = $request->validate([
             'to_obp_id' => 'required|string|exists:users,obp_id',
             'amount'    => 'required|numeric|min:0.01',
+            'note'      => 'nullable|string|max:255',
         ]);
 
         $fromUser = $request->user();
@@ -92,7 +98,7 @@ class WalletController extends Controller
                 'currency' => $fromWallet->currency,
                 'description' => 'Transfert vers ' . $toUser->obp_id,
                 'status'   => 'completed',
-                'meta'     => ['to' => $toUser->obp_id],
+                'meta'     => ['to' => $toUser->obp_id, 'note' => $data['note'] ?? ''],
             ]);
 
             Transactions::create([
@@ -102,10 +108,13 @@ class WalletController extends Controller
                 'currency' => $toWallet->currency,
                 'description' => 'Transfert reçu de ' . $fromUser->obp_id,
                 'status'   => 'completed',
-                'meta'     => ['from' => $fromUser->obp_id],
+                'meta'     => ['from' => $fromUser->obp_id, 'note' => $data['note'] ?? ''],
             ]);
         });
-
-        return response()->json(['message' => 'Transfert effectué.']);
+        add_score($fromUser, 5, "transfer");
+        return response()->json([
+            'message' => 'Transfert effectué.',
+            'new_balance' => $fromWallet->fresh()->balance,
+        ]);
     }
 }

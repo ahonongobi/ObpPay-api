@@ -28,8 +28,11 @@ Route::post('/auth/verify-otp', [OtpsController::class, 'verifyOtp']);  // conne
 
 Route::middleware('auth:sanctum')->group(function () {
 
-    Route::get('/auth/me',     [AuthController::class, 'me']);
+    Route::get('/auth/me',     [AuthController::class, 'me']); 
     Route::post('/auth/logout', [AuthController::class, 'logout']);
+
+    // Fecth user by obp_id
+    Route::get('/user/by-obp/{obp_id}', [AuthController::class, 'findByObp']);
 
     // Wallet
     Route::get('/wallet/balance',       [WalletController::class, 'balance']);
@@ -40,4 +43,24 @@ Route::middleware('auth:sanctum')->group(function () {
     // Loan
     Route::get('/loan/eligibility',     [LoanrequestsController::class, 'eligibility']);
     Route::post('/loan/request',        [LoanrequestsController::class, 'requestLoan']);
+
+    
+});
+
+Route::middleware('auth:sanctum')->get('/user/score', function (Request $request) {
+    return response()->json([
+        'score' => $request->user()->score,
+    ]);
+});
+
+Route::middleware('auth:sanctum')->get('/user/score/latest', function (Request $request) {
+    $last = \App\Models\UserScore::where('user_id', $request->user()->id)
+        ->orderByDesc('id')
+        ->first();
+
+    return response()->json([
+        'score' => $request->user()->score,
+        'last_points' => $last?->points ?? 0,
+        'reason' => $last?->reason ?? null,
+    ]);
 });

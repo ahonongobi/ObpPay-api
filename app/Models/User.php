@@ -62,4 +62,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Loanrequests::class);
     }
+
+    public function scoreEvents()
+    {
+        return $this->hasMany(UserScore::class);
+    }
 }
