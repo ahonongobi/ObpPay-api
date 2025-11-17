@@ -10,6 +10,9 @@ use App\Services\ScoreService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use App\Helpers\SmsHelper;
+use Illuminate\Validation\Rule;
+
 use Str;
 
 class AuthController extends Controller
@@ -33,21 +36,51 @@ class AuthController extends Controller
             'password' => 'required|string|min:6',
         ]);
 
+        
+
+        // générer OTP  4 chiffres 
+        //$otp = rand(1000, 9999);
+        $otp = rand(1000, 9999);
+        $smsStatus = SmsHelper::sendOtp($data['phone'], $otp);
+
+        if (!$smsStatus) {
+            return response()->json([
+                'message' => 'Impossible d’envoyer l\'OTP pour le moment.'
+            ], 500);
+        }
+
         // enregistrer temporairement
         PendingRegistration::create([
             'name'     => $data['name'],
             'phone'    => $data['phone'],
             'password' => Hash::make($data['password']),
         ]);
+        // enregistrer OTP
 
-        // générer OTP  4 chiffres 
-        $otp = rand(1000, 9999);
+
+        //L’utilisateur peut demander 2 OTP maximum par période (ex : 5 minutes).
+        //Si le système détecte plus de 2 demandes, il bloque.
+         // Message clair → "Usage suspect détecté. Veuillez réessayer plus tard."
+        //Parfait pour éviter spam + bots.
+
+        $otpCount = otps::where('phone', $data['phone'])
+            ->where('created_at', '>=', now()->subMinutes(5))
+            ->count();
+
+        if ($otpCount >= 2) {
+            return response()->json([
+                'message' => 'Usage suspect détecté. Veuillez réessayer plus tard.'
+            ], 429);
+        }
 
         otps::create([
             'phone'      => $data['phone'],
             'code'       => $otp,
             'expires_at' => now()->addMinutes(3), // expire dans 3 min
         ]);
+
+
+
 
         return response()->json([
             'message' => 'OTP envoyé (mode dev).',
@@ -93,6 +126,7 @@ class AuthController extends Controller
             'password' => $pending->password,
             //'obp_id'   => $this->generateObpId(),
             'obp_id'   => $data['obp_id'],
+            'card_cvv' => str_pad(rand(0, 999), 3, '0', STR_PAD_LEFT),
         ]);
 
         Wallet::create([
@@ -173,6 +207,62 @@ class AuthController extends Controller
         return response()->json([
             'name' => $user->name,
             'obp_id' => $user->obp_id,
+        ]);
+    }
+
+
+    public function updateProfile(Request $request)
+    {
+        $user = $request->user();
+
+        $data = $request->validate([
+            'name'  => 'required|string|max:255',
+            'phone' => [
+                'required',
+                'string',
+                'max:20',
+                Rule::unique('users', 'phone')->ignore($user->id),
+            ],
+            'email' => [
+                'nullable',
+                'email',
+                Rule::unique('users', 'email')->ignore($user->id),
+            ],
+        ]);
+
+        $user->update([
+            'name'  => $data['name'],
+            'phone' => $data['phone'],
+            'email' => $data['email'] ?? null,
+        ]);
+
+        return response()->json([
+            'message' => 'Profil mis à jour avec succès.',
+            'user'    => $user->fresh('wallet'),
+        ]);
+    }
+
+
+    public function changePassword(Request $request)
+    {
+        $user = $request->user();
+
+        $data = $request->validate([
+            'current_password' => 'required|string',
+            'new_password'     => 'required|string|min:6',
+        ]);
+
+        if (! Hash::check($data['current_password'], $user->password)) {
+            return response()->json([
+                'message' => 'Mot de passe actuel incorrect.',
+            ], 422);
+        }
+
+        $user->password = Hash::make($data['new_password']);
+        $user->save();
+
+        return response()->json([
+            'message' => 'Mot de passe mis à jour avec succès.',
         ]);
     }
 }

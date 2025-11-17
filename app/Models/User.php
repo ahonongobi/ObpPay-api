@@ -23,6 +23,8 @@ class User extends Authenticatable
         'email',
         'password',
         'obp_id',
+        'card_cvv',
+        'avatar',
     ];
 
     
@@ -46,6 +48,18 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    protected $appends = ['avatar_url'];
+
+    public function getAvatarUrlAttribute()
+    {
+        if (!$this->avatar) {
+            return "https://i.postimg.cc/nhqCkh77/default-avatar-icon-of-social-media-user-vector.jpg";
+        
+        }
+
+        return asset('storage/' . $this->avatar);
+    }
 
 
     public function wallet()

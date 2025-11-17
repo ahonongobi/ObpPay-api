@@ -9,17 +9,31 @@ class LoanrequestsController extends Controller
 {
     public function eligibility(Request $request)
     {
-        $wallet = $request->user()->wallet;
+
+        // get user score from user table and check if its geather than 50, then eligible
+
+        $user_score = $request->user()->score;
+        if ($user_score > 50) {
+            return response()->json([
+                'eligibility' => 1,
+                'message' => 'Votre score utilisateur vous rend éligible pour un prêt.',
+            ]);
+        }
+        else {
+            return response()->json([
+                'eligibility' => 0,
+                'message' => 'Votre score utilisateur est insuffisant pour un prêt.',
+            ]);
+        }
 
         // eligible si solde >= 50 000
-        $score = min(1, $wallet->balance / 50000);
+        //$score = min(1, $wallet->balance / 50000);
 
-        return response()->json([
-            'eligibility' => $score, // 0..1
-            'message' => $score >= 0.5
-                ? 'Vous êtes éligible pour un prêt substantiel.'
-                : 'Éligibilité faible.',
-        ]);
+        //return response()->json([
+         //   'eligibility' => $score, // 0..1
+        //    'message' => $score >= 0.5 ? 'Vous êtes éligible pour un prêt substantiel.'
+         //       : 'Éligibilité faible.',
+        //]);
     }
 
     public function requestLoan(Request $request)
