@@ -1,0 +1,23 @@
+Whenever a KYC is approved:
+Notification::create([
+    'user_id' => $user->id,
+    'type' => 'KYC_APPROVED',
+    'title' => 'KYC vérifié',
+    'message' => 'Votre vérification d’identité a été approuvée.',
+]);
+Whenever a KYC is rejected:
+Notification::create([
+    'user_id' => $user->id,
+    'type' => 'KYC_REJECTED',
+    'title' => 'KYC rejeté',
+    'message' => 'Votre document a été rejeté. Veuillez le retéléverser.',
+]);
+
+On transfer received:
+
+Notification::create([
+    'user_id' => $toUser->id,
+    'type' => 'TRANSFER_RECEIVED',
+    'title' => 'Transfert reçu',
+    'message' => "Vous avez reçu ${data['amount']} XOF de {$fromUser->obp_id}",
+]);

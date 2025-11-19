@@ -81,4 +81,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(UserScore::class);
     }
+
+    public function kyc()
+    {
+        return $this->hasMany(Kyc::class);
+    }
 }

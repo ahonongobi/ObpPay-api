@@ -15,9 +15,12 @@ use Illuminate\Support\Facades\Route;
 */
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\KycController;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\LoanController;
 use App\Http\Controllers\LoanrequestsController;
+use App\Http\Controllers\MoMoController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OtpsController;
 use App\Http\Controllers\UserController;
 
@@ -38,13 +41,17 @@ Route::middleware('auth:sanctum')->group(function () {
     // Wallet
     Route::get('/wallet/balance',       [WalletController::class, 'balance']); // connected to flutter
     Route::get('/wallet/transactions',  [WalletController::class, 'transactions']);
-    Route::post('/wallet/deposit',      [WalletController::class, 'deposit']);
+    Route::post('/wallet/deposit',      [WalletController::class, 'deposit']); // MoMo Connected to flutter for now 
     Route::post('/wallet/transfer',     [WalletController::class, 'transfer']); // connected to flutter
 
     // Loan
     Route::get('/loan/eligibility',     [LoanrequestsController::class, 'eligibility']); // connected to flutter
     Route::post('/loan/request',        [LoanrequestsController::class, 'requestLoan']); // connected to flutter
 
+    // MoMo Payment
+    Route::post('/momo/pay', [MoMoController::class, 'mobilePay']);  // connected to flutter
+
+   
     
 });
 
@@ -68,7 +75,15 @@ Route::middleware('auth:sanctum')->get('/user/score/latest', function (Request $
 
 Route::middleware('auth:sanctum')->group(function () {
     // ...
-    Route::put('/auth/profile', [AuthController::class, 'updateProfile']);
-    Route::post('/auth/change-password', [AuthController::class, 'changePassword']);
-    Route::post('/user/update-photo', [UserController::class, 'updatePhoto']);
+    Route::put('/auth/profile', [AuthController::class, 'updateProfile']); // Connected to flutter
+    Route::post('/auth/change-password', [AuthController::class, 'changePassword']); // Connected to flutter
+    Route::post('/user/update-photo', [UserController::class, 'updatePhoto']); // Connected to flutter
+
+
+    Route::post('/kyc/upload', [KycController::class, 'uploadDocument']);
+    Route::get('/kyc/status', [KycController::class, 'getStatus']);
+    Route::post('/kyc/submit', [KycController::class, 'submitKyc']);
 });
+
+Route::get('/notifications', [NotificationController::class, 'index']);
+Route::post('/notifications/mark-read', [NotificationController::class, 'markRead']);
