@@ -185,8 +185,6 @@ paths:
       responses:
         '200':
           description: Latest score
-        '404':
-          description: No score found
 
   /user/score:
     get:
@@ -196,8 +194,6 @@ paths:
       responses:
         '200':
           description: List of scores
-        '404':
-          description: No scores found
 
   /wallet/balance:
     get:
@@ -278,6 +274,176 @@ paths:
       responses:
         '200':
           description: Loan request submitted
+
+
+  # ---------------------
+  # KYC MODULE
+  # ---------------------
+
+  /kyc/upload:
+    post:
+      summary: Upload KYC document
+      tags: [KYC]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [type, file]
+              properties:
+                type:
+                  type: string
+                  enum: [selfie, passport, cip]
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Document uploaded successfully
+
+  /kyc/status:
+    get:
+      summary: Get KYC status
+      tags: [KYC]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Status returned
+
+  /kyc/submit:
+    post:
+      summary: Submit KYC request
+      tags: [KYC]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: KYC submitted
+        '400':
+          description: Missing documents
+
+
+  # ---------------------
+  # NOTIFICATIONS
+  # ---------------------
+
+  /notifications:
+    get:
+      summary: List notifications
+      tags: [Notifications]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Notifications list
+
+  /notifications/mark-read:
+    post:
+      summary: Mark all notifications as read
+      tags: [Notifications]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Notifications marked as read
+
+
+  # ---------------------
+  # MARKETPLACE
+  # ---------------------
+
+  /products:
+    get:
+      summary: Get products list
+      tags: [Marketplace]
+      parameters:
+        - in: query
+          name: category_id
+          schema: { type: integer }
+        - in: query
+          name: search
+          schema: { type: string }
+      responses:
+        '200':
+          description: List of products
+
+  /categories:
+    get:
+      summary: Get product categories
+      tags: [Marketplace]
+      responses:
+        '200':
+          description: List of categories
+
+  /products/{id}/installments:
+    get:
+      summary: Get installment plans
+      tags: [Installments]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Plans returned
+
+  /market/installment/start:
+    post:
+      summary: Start installment payment
+      tags: [Installments]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [product_id, plan_id]
+              properties:
+                product_id: { type: integer }
+                plan_id: { type: integer }
+      responses:
+        '200':
+          description: First installment paid
+        '422':
+          description: Insufficient balance
+
+  /market/pay-now:
+    post:
+      summary: Pay full product price instantly
+      tags: [Marketplace]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [product_id]
+              properties:
+                product_id: { type: integer }
+      responses:
+        '200':
+          description: Payment successful
+        '422':
+          description: Insufficient balance
+
+  /cron/installments/process:
+    post:
+      summary: Cron - Process monthly installment payments
+      tags: [Cron]
+      responses:
+        '200':
+          description: Cron executed
 
 components:
   securitySchemes:

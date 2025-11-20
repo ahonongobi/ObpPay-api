@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -28,6 +29,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\InstallmentPlanController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\WithdrawalController;
 
 Route::post('/auth/register', [AuthController::class, 'register']);  // connected to flutter
 Route::post('/auth/login',    [AuthController::class, 'login']);  // connected to flutter
@@ -112,3 +114,17 @@ Route::post('/market/pay-now', [PurchaseController::class, 'payNow'])
 // Cron: Process automatic payments nned to run later: * * * * * php /var/www/html/obppay/artisan schedule:run >> /dev/null 2>&1
 
 Route::post('/cron/installments/process', [InstallmentPlanController::class, 'processMonthly']);
+
+
+// ------ USER SIDE ------
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/withdraw/request', [WithdrawalController::class, 'request']);
+    Route::get('/withdraw/history', [WithdrawalController::class, 'history']);
+});
+
+// ------ ADMIN SIDE ------
+Route::middleware(['auth:sanctum', 'is_admin'])->group(function () {
+    Route::get('/admin/withdraws', [AdminController::class, 'index']);
+    Route::post('/admin/withdraws/{id}/approve', [AdminController::class, 'approve']);
+    Route::post('/admin/withdraws/{id}/reject', [AdminController::class, 'reject']);
+});
