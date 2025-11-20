@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CategoriesController;
 use App\Http\Controllers\KycController;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\LoanController;
@@ -22,6 +23,10 @@ use App\Http\Controllers\LoanrequestsController;
 use App\Http\Controllers\MoMoController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OtpsController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\InstallmentPlanController;
+use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\UserController;
 
 Route::post('/auth/register', [AuthController::class, 'register']);  // connected to flutter
@@ -80,10 +85,30 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/user/update-photo', [UserController::class, 'updatePhoto']); // Connected to flutter
 
 
-    Route::post('/kyc/upload', [KycController::class, 'uploadDocument']);
-    Route::get('/kyc/status', [KycController::class, 'getStatus']);
-    Route::post('/kyc/submit', [KycController::class, 'submitKyc']);
+    Route::post('/kyc/upload', [KycController::class, 'uploadDocument']); // connected to flutter
+    Route::get('/kyc/status', [KycController::class, 'getStatus']); // connected to flutter
+    Route::post('/kyc/submit', [KycController::class, 'submitKyc']); // connected to flutter
+
+    
 });
 
 Route::get('/notifications', [NotificationController::class, 'index']);
 Route::post('/notifications/mark-read', [NotificationController::class, 'markRead']);
+Route::get('/products', [ProductController::class, 'index']);
+Route::get('/categories', [CategoriesController::class, 'index']);
+
+
+// Installment Plans by Product
+Route::get('/products/{id}/installments', [InstallmentPlanController::class, 'getPlans'])->middleware('auth:sanctum');
+
+// Start installment payment
+Route::post('/market/installment/start', [InstallmentPlanController::class, 'startInstallment'])
+    ->middleware('auth:sanctum');
+
+Route::post('/market/pay-now', [PurchaseController::class, 'payNow'])
+    ->middleware('auth:sanctum');
+
+
+// Cron: Process automatic payments nned to run later: * * * * * php /var/www/html/obppay/artisan schedule:run >> /dev/null 2>&1
+
+Route::post('/cron/installments/process', [InstallmentPlanController::class, 'processMonthly']);
