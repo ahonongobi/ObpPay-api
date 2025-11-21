@@ -120,6 +120,10 @@ Route::post('/cron/installments/process', [InstallmentPlanController::class, 'pr
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/withdraw/request', [WithdrawalController::class, 'request']);
     Route::get('/withdraw/history', [WithdrawalController::class, 'history']);
+
+
+    // /user/save-fcm-token
+    Route::post('/user/save-fcm-token', [UserController::class, 'saveFcmToken']);
 });
 
 // ------ ADMIN SIDE ------
@@ -128,3 +132,7 @@ Route::middleware(['auth:sanctum', 'is_admin'])->group(function () {
     Route::post('/admin/withdraws/{id}/approve', [AdminController::class, 'approve']);
     Route::post('/admin/withdraws/{id}/reject', [AdminController::class, 'reject']);
 });
+
+use App\Http\Controllers\FCMTestController;
+
+Route::post('/test-fcm', [FCMTestController::class, 'send']);

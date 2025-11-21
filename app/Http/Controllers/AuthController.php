@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use App\Helpers\SmsHelper;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 
 use Str;
@@ -172,6 +173,29 @@ class AuthController extends Controller
         $pointsAdded = add_score($user, 1, "login");
 
         $token = $user->createToken('mobile')->plainTextToken;
+
+        // Mettre à jour le FCM token
+        if (!empty($request->fcm_token)) {
+            $user->update([
+                'fcm_token' => $request->fcm_token,
+            ]);
+        }
+
+        //  Envoyer une notification test
+        if ($user->fcm_token) {
+            try {
+                $firebase = new \App\Services\FirebaseService();
+
+                $firebase->sendToToken(
+                    $user->fcm_token,
+                    "Connexion réussie 👋",
+                    "Bienvenue sur ObpPay !",
+                    ["screen" => "dashboard"]
+                );
+            } catch (\Exception $e) {
+                Log::error("FCM LOGIN ERROR: " . $e->getMessage());
+            }
+        }
 
         return response()->json([
             'user'  => $user,

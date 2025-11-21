@@ -21,3 +21,54 @@ Notification::create([
     'title' => 'Transfert reçu',
     'message' => "Vous avez reçu ${data['amount']} XOF de {$fromUser->obp_id}",
 ]);
+
+
+
+
+
+
+
+
+
+////////////////////////////// Firebase Notification
+so when 
+
+🔥 4.1 KYC approved
+$firebase->sendToToken(
+    $user->fcm_token,
+    "KYC vérifié",
+    "Votre vérification d’identité a été approuvée.",
+    ["screen" => "kyc"]
+);
+
+❌ 4.2 KYC rejected
+
+$firebase->sendToToken(
+    $user->fcm_token,
+    "KYC rejeté",
+    "Votre document a été rejeté. Veuillez le retéléverser.",
+    ["screen" => "kyc"]
+);
+
+💸 4.3 Transfer received
+
+$firebase->sendToToken(
+    $toUser->fcm_token,
+    "Transfert reçu",
+    "Vous avez reçu {$data['amount']} XOF de {$fromUser->obp_id}",
+    [
+        "screen" => "transactions",
+        "amount" => $data['amount']
+    ]
+);
+🟩 ÉTAPE 5 — Flutter : ouvrir une page quand on clique
+FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+  final screen = message.data['screen'];
+
+  if (screen == "kyc") {
+    Navigator.push(context, MaterialPageRoute(builder: (_) => KycScreen()));
+  }
+  if (screen == "transactions") {
+    Navigator.push(context, MaterialPageRoute(builder: (_) => TransactionsScreen()));
+  }
+});

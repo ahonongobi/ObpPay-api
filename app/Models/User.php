@@ -25,6 +25,7 @@ class User extends Authenticatable
         'obp_id',
         'card_cvv',
         'avatar',
+        'fcm_token',
     ];
 
     
