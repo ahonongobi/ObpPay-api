@@ -171,9 +171,11 @@ class AuthController extends Controller
         }
 
         $pointsAdded = add_score($user, 1, "login");
-
+        
+        // Noramal token
         $token = $user->createToken('mobile')->plainTextToken;
-
+        // biometric token 
+        $biometricToken = $user->createToken('biometric')->plainTextToken;
         // Mettre à jour le FCM token
         if (!empty($request->fcm_token)) {
             $user->update([
@@ -200,8 +202,41 @@ class AuthController extends Controller
         return response()->json([
             'user'  => $user,
             'token' => $token,
+            'biometric_token' => $biometricToken,
             'points_added' => $pointsAdded,
 
+        ]);
+    }
+
+
+    public function biometricLogin(Request $request)
+    {
+        $data = $request->validate([
+            'biometric_token' => 'required',
+        ]);
+
+        // Trouver le token
+        $token = \Laravel\Sanctum\PersonalAccessToken::findToken($data['biometric_token']);
+
+        if (!$token || $token->name !== 'biometric') {
+            throw ValidationException::withMessages([
+                'message' => ['Token biométrique invalide.'],
+            ]);
+        }
+
+        $user = $token->tokenable;
+
+        // Mettre à jour le FCM token
+        if (!empty($request->fcm_token)) {
+            $user->update([
+                'fcm_token' => $request->fcm_token,
+            ]);
+        }
+
+        return response()->json([
+            'token' => $user->createToken('mobile')->plainTextToken,
+            'biometric_token' => $data['biometric_token'],
+            'user'  => $user,
         ]);
     }
 
@@ -214,7 +249,9 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        //$request->user()->currentAccessToken()->delete();
+        // delete only mobile tokens
+        $request->user()->tokens()->where('name', 'mobile')->delete();
 
         return response()->json(['message' => 'Déconnecté.']);
     }

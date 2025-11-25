@@ -27,15 +27,25 @@ use App\Http\Controllers\OtpsController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\InstallmentPlanController;
+use App\Http\Controllers\PasswordController;
 use App\Http\Controllers\PurchaseController;
+use App\Http\Controllers\SupportController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WithdrawalController;
 
 Route::post('/auth/register', [AuthController::class, 'register']);  // connected to flutter
 Route::post('/auth/login',    [AuthController::class, 'login']);  // connected to flutter
+Route::post('/auth/login/biometric',    [AuthController::class, 'biometricLogin']);  // connected to flutter
 
 Route::post('/auth/send-otp', [OtpsController::class, 'sendOtp']);  // connected to flutter
 Route::post('/auth/verify-otp', [OtpsController::class, 'verifyOtp']);  // connected to flutter 
+
+// /auth/forgot-password
+Route::post('/auth/forgot-password', [PasswordController::class, 'forgotPassword']); // connected to flutter
+// /auth/reset-password
+Route::post('/auth/reset-password', [PasswordController::class, 'resetPassword']); //
+// verify - reset otp
+Route::post('/auth/verify-reset-otp', [PasswordController::class, 'verifyResetOtp']); // connected to flutter
 
 Route::middleware('auth:sanctum')->group(function () {
 
@@ -94,7 +104,7 @@ Route::middleware('auth:sanctum')->group(function () {
     
 });
 
-Route::get('/notifications', [NotificationController::class, 'index']);
+Route::get('/notifications', [NotificationController::class, 'index'])->middleware('auth:sanctum');
 Route::post('/notifications/mark-read', [NotificationController::class, 'markRead']);
 Route::get('/products', [ProductController::class, 'index']);
 Route::get('/categories', [CategoriesController::class, 'index']);
@@ -125,6 +135,10 @@ Route::middleware('auth:sanctum')->group(function () {
     // /user/save-fcm-token
     Route::post('/user/save-fcm-token', [UserController::class, 'saveFcmToken']);
 });
+
+Route::post('/support/message', [SupportController::class, 'send'])
+    ->middleware('auth:sanctum');
+
 
 // ------ ADMIN SIDE ------
 Route::middleware(['auth:sanctum', 'is_admin'])->group(function () {
