@@ -92,4 +92,23 @@ class User extends Authenticatable
     {
         return $this->hasMany(Notification::class);
     }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($user) {
+
+            // --- PHONE AUTO POUR ADMIN ---
+            if (empty($user->phone)) {
+                $user->phone = 'admin-' . rand(100000, 999999);
+            }
+
+            // --- OBP-ID AUTO POUR ADMIN ---
+            if (empty($user->obp_id)) {
+                // Format exemple : OBP-A12345
+                $user->obp_id = 'OBP-A' . rand(10000, 99999);
+            }
+        });
+    }
 }
