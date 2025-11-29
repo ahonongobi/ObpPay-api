@@ -1,7 +1,11 @@
 <?php
 
 use App\Http\Controllers\Admin\LoanRequestController;
+use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\WithdrawalController as AdminWithdrawalController;
 use App\Http\Controllers\Admin\WithdrawRequestController;
+use App\Http\Controllers\AdminProductController;
+use App\Http\Controllers\WithdrawalController;
 use Illuminate\Support\Facades\Route;
 use App\Models\Transactions;
 use Illuminate\Support\Facades\DB;
@@ -123,10 +127,56 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
    // store route
     Route::post('/marketplace', [\App\Http\Controllers\Admin\MarketplaceController::class, 'store'])
         ->name('admin.marketplace.store');
-        
+
     // setting route
     Route::get('/settings', [\App\Http\Controllers\Admin\SettingsController::class, 'index'])
         ->name('admin.settings.index');
 
+   // setting for the admins dashboard
+   Route::get('/settings/admins/settings', [\App\Http\Controllers\Admin\SettingsController::class, 'index'])
+        ->name('admin.settings.admins.index');
     
+});
+
+
+Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
+
+    Route::get('/settings/admins', [\App\Http\Controllers\Admin\SettingsController::class, 'admins'])
+        ->name('admin.settings.admins');
+
+    Route::post('/settings/admins', [\App\Http\Controllers\Admin\SettingsController::class, 'storeAdmin'])
+        ->name('admin.settings.admins.store');
+
+    Route::delete('/settings/admins/{id}', [\App\Http\Controllers\Admin\SettingsController::class, 'deleteAdmin'])
+        ->name('admin.settings.admins.delete');
+});
+
+
+Route::prefix('admin/products')->group(function () {
+
+    Route::get('/', [ProductController::class, 'index'])->name('admin.products.index');
+
+    Route::get('/create', [ProductController::class, 'create'])->name('admin.products.create');
+    Route::post('/store', [ProductController::class, 'store'])->name('admin.products.store');
+
+    Route::get('/edit/{id}', [ProductController::class, 'edit'])->name('admin.products.edit');
+    Route::put('/update/{id}', [ProductController::class, 'update'])->name('admin.products.update');
+
+    Route::delete('/delete/{id}', [ProductController::class, 'destroy'])->name('admin.products.delete');
+    Route::get('/show/{id}', [ProductController::class, 'show'])->name('admin.products.show');
+});
+
+Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
+
+    Route::get('/withdrawals', [App\Http\Controllers\Admin\WithdrawalController::class, 'index'])
+        ->name('admin.withdrawals.index');
+
+    Route::get('/withdrawals/{id}', [App\Http\Controllers\Admin\WithdrawalController::class, 'show'])
+        ->name('admin.withdrawals.show');
+
+    Route::post('/withdrawals/{id}/approve', [App\Http\Controllers\Admin\WithdrawalController::class, 'approve'])
+        ->name('admin.withdrawals.approve');
+
+    Route::post('/withdrawals/{id}/reject', [App\Http\Controllers\Admin\WithdrawalController::class, 'reject'])
+        ->name('admin.withdrawals.reject');
 });

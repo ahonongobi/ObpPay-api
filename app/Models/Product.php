@@ -32,4 +32,9 @@ class Product extends Model
 
         return url($value);
     }
+
+    public function installments()
+    {
+        return $this->hasMany(\App\Models\InstallmentPlan::class, 'product_id');
+    }
 }

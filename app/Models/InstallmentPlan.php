@@ -15,4 +15,9 @@ class InstallmentPlan extends Model
         'total_amount',
         'is_active'
     ];
+
+    public function product()
+    {
+        return $this->belongsTo(\App\Models\Product::class);
+    }
 }

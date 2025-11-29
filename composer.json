@@ -31,7 +31,8 @@
             "Database\\Seeders\\": "database/seeders/"
         },
         "files": [
-            "app/Helpers/score_helper.php"
+            "app/Helpers/score_helper.php",
+            "app/Helpers/AdminLogHelper.php"
         ]
     },
     "autoload-dev": {

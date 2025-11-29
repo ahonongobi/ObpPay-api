@@ -19,8 +19,11 @@ class AdminOnly
             return redirect()->route('admin.login');
         }
 
-        if (!auth()->user()->is_admin) {
-            abort(403, 'Access denied');
+        //if (!auth()->user()->is_admin) {
+        //    abort(403, 'Access denied');
+        //}
+        if (!auth()->check() || !in_array(auth()->user()->role, ['admin', 'superadmin'])) {
+            abort(403, "You are not allowed to access this page");
         }
 
         return $next($request);

@@ -26,6 +26,7 @@ class User extends Authenticatable
         'card_cvv',
         'avatar',
         'fcm_token',
+        'role',
     ];
 
     

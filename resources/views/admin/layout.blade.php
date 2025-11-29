@@ -306,6 +306,15 @@ body.dark-mode .stat-green {
            class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
             <i class="bi bi-bar-chart-fill me-2"></i> Dashboard
         </a>
+        @if(auth()->user()->role === 'superadmin')
+    <a href="{{ route('admin.settings.admins') }}"
+    class="{{ request()->routeIs('admin.settings.admins') ? 'active' : '' }}">
+        <i class="bi bi-people-fill me-2"></i> Gestion admins
+        </a>
+         @endif
+
+        
+
 
          <a href="{{ route('admin.users.index') }}"
            class="{{ request()->routeIs('admin.users.index') ? 'active' : '' }}">
@@ -322,23 +331,40 @@ body.dark-mode .stat-green {
             <i class="bi bi-cash-stack me-2"></i> Transactions
         </a>
 
+        {{-- withdraw menu --}}
+
+        <a href="{{ route('admin.withdrawals.index') }}"
+           class="{{ request()->routeIs('admin.withdrawals.index') ? 'active' : '' }}">
+            <i class="bi bi-wallet2 me-2"></i> Retraits Utilisateurs
+        </a>
+
     <a href="{{ route('admin.loans.index') }}"
     class="{{ request()->routeIs('admin.loan.index') ? 'active' : '' }}">
         <i class="bi bi-hand-thumbs-up-fill me-2"></i> Aide / Prêts
         </a>
 
         {{-- user withdrawal, Marketplace, Settings can be added later --}}
-
+{{--
         <a href="{{route('admin.withdrawals.index')}}"
               class="{{ request()->routeIs('admin.withdrawals.index') ? 'active' : '' }}">
                 <i class="bi bi-wallet2 me-2"></i> Retraits Utilisateurs 
         </a>
+            --}}
+    
+            {{-- Marketplace --}}
         <a href="{{ route('admin.marketplace.index') }}"
            class="{{ request()->routeIs('admin.marketplace.index') ? 'active' : '' }}">
             <i class="bi bi-shop me-2"></i> Marketplace
         </a>
-        <a href="{{ route('admin.settings.index') }}"
-           class="{{ request()->routeIs('admin.settings.index') ? 'active' : '' }}">
+
+         {{-- Product Marketplace --}}
+        <a href="{{ route('admin.products.index') }}"
+           class="{{ request()->routeIs('admin.products.index') ? 'active' : '' }}">
+            <i class="bi bi-box-seam me-2"></i> Produits
+        </a>
+
+        <a href="{{ route('admin.settings.admins.index') }}"
+           class="{{ request()->routeIs('admin.settings.admins.index') ? 'active' : '' }}">
             <i class="bi bi-gear-fill me-2"></i> Paramètres
         </a>
 
