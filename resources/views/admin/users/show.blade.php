@@ -145,7 +145,8 @@ body.dark-mode .btn-close {
             <i class="bi bi-wallet2"></i>
             Balance :
             <strong class="text-success">
-                {{ number_format($user->wallet->balance, 0, ',', ' ') }} XOF
+                {{ number_format(optional($user->wallet)->balance ?? 0, 0, ',', ' ') }} XOF
+
             </strong>
         </p>
 

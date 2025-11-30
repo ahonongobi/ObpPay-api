@@ -43,6 +43,8 @@ class LoanRequestController extends Controller
         $wallet->balance += $loan->amount;
         $wallet->save();
 
+
+
         // FIREBASE notification
         if ($loan->user->fcm_token) {
             $firebase->sendToToken(
@@ -65,6 +67,13 @@ class LoanRequestController extends Controller
         $loan = Loanrequests::with('user')->findOrFail($id);
         $loan->status = "rejected";
         $loan->save();
+
+
+        admin_log(
+            'loan',
+            "Prêt #{$loan->id} rejeté",
+            ['amount' => $loan->amount]
+        );
 
         if ($loan->user->fcm_token) {
             $firebase->sendToToken(

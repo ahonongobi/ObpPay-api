@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\InstallmentPlan;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
@@ -43,7 +44,7 @@ class ProductController extends Controller
             'description' => 'nullable|string',
             'stock'       => 'required|integer|min:0',
             'tags'        => 'nullable|string',
-            'image'       => 'nullable|image|max:2048',
+            'image'       => 'image|max:2048',
             'is_active'   => 'required|boolean',
 
             // Installments
@@ -88,6 +89,19 @@ class ProductController extends Controller
                 }
             }
         }
+
+        $user = Auth::user();
+
+        admin_log(
+            'product',
+            "Produit #{$product->id} ajouté par {$user->name} (ID: {$user->id})",
+            [
+                'price' => $request->price,
+                'stock' => $request->stock,
+                'is_active' => $request->is_active
+            ]
+        );
+
 
         return redirect()->route('admin.products.index')
             ->with('success', 'Produit ajouté avec succès.');
@@ -160,6 +174,11 @@ class ProductController extends Controller
                 }
             }
         }
+        admin_log(
+            'product',
+            "Produit #{$product->id} mis à jour",
+            ['price' => $request->price]
+        );
 
         return redirect()->route('admin.products.index')
             ->with('success', 'Produit mis à jour avec succès.');
@@ -181,6 +200,13 @@ class ProductController extends Controller
 
         // Delete product
         $product->delete();
+
+        admin_log(
+            'product',
+            "Produit #{$product->id} supprimé",
+            ['price' => $product->price]
+        );
+
 
         return back()->with('success', 'Produit supprimé.');
     }

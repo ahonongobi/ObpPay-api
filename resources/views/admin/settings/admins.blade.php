@@ -150,15 +150,26 @@ body.dark-mode .table-modern tbody tr:hover {
             </div>
 
             <div class="col-md-4">
-                <label class="form-label">Mot de passe</label>
-                <input type="password" name="password" class="form-control" required>
+            <label class="form-label">Mot de passe</label>
+
+            <div class="input-group">
+                <input type="text" id="passwordField" name="password" class="form-control" required>
+
+                <button type="button" class="btn btn-outline-primary" onclick="generatePassword()">
+                    <i class="bi bi-magic"></i> Générer
+                </button>
             </div>
+
+            <small id="copyMsg" class="text-success d-none">✔️ Copié dans le presse-papier</small>
+            </div>
+
 
             <div class="col-md-4">
                 <label class="form-label">Rôle</label>
                 <select name="role" class="form-select" required>
                     <option value="admin">Admin</option>
                     <option value="superadmin">Super Admin</option>
+                    <option value="particulier" > Particulier </option>
                 </select>
             </div>
 
@@ -189,7 +200,7 @@ body.dark-mode .table-modern tbody tr:hover {
         <tbody>
             @foreach($admins as $a)
             <tr>
-                <td>{{ $a->id }}</td>
+                <td>{{ $a->obp_id }}</td>
                 <td>{{ $a->name }}</td>
                 <td>{{ $a->phone }}</td>
 
@@ -257,5 +268,27 @@ body.dark-mode .table-modern tbody tr:hover {
 </div>
 
 </div>
+<script>
+function generatePassword() {
+    // Mot de passe fort : 12 caractères
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+";
+    let pwd = "";
+
+    for (let i = 0; i < 12; i++) {
+        pwd += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+
+    // Mettre dans l’input
+    const field = document.getElementById("passwordField");
+    field.value = pwd;
+
+    // Copier automatiquement
+    navigator.clipboard.writeText(pwd).then(() => {
+        const msg = document.getElementById("copyMsg");
+        msg.classList.remove("d-none");
+        setTimeout(() => msg.classList.add("d-none"), 2000);
+    });
+}
+</script>
 
 @endsection

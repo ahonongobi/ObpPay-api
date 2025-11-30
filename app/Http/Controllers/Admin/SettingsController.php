@@ -54,7 +54,15 @@ class SettingsController extends Controller
 
     public function index()
     {
-        return view('admin.settings.index');
+
+
+        $admin = auth()->user();
+
+        $logs = \App\Models\AdminLog::with('admin')
+            ->orderBy('id', 'desc')
+            ->paginate(10);
+
+        return view('admin.settings.index', compact('admin', 'logs'));
     }
 
     

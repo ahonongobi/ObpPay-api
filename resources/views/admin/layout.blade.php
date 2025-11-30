@@ -368,12 +368,6 @@ body.dark-mode .stat-green {
             <i class="bi bi-gear-fill me-2"></i> Paramètres
         </a>
 
-
-
-
-
-
-
         <hr class="border-light">
 
         <button onclick="toggleTheme()" class="btn btn-light w-100 mt-3 d-flex align-items-center justify-content-center gap-2">

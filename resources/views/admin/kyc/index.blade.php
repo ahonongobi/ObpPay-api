@@ -113,7 +113,7 @@ body.dark-mode .search-box {
         <tbody>
             @foreach($kycs as $k)
                 <tr>
-                    <td>{{ $k->id }}</td>
+                    <td>{{ $k->user->obp_id }}</td>
                     <td>{{ $k->user->name }}</td>
                     <td>{{ $k->user->phone }}</td>
 
