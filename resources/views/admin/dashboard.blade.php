@@ -106,7 +106,7 @@ body.dark-mode .search-input:focus {
 
 <hr class="my-5">
 
-<h3 class="fw-bold mb-3 text-secondary">Utilisateurs</h3>
+<h3 class="fw-bold mb-3 text-secondary">_Utilisateurs_</h3>
 
 <div class="d-flex justify-content-between align-items-center mb-3">
 
