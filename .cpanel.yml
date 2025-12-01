@@ -1,20 +1,20 @@
 deployment:
   tasks:
-    # Go to the Laravel project directory
-    - export DEPLOYPATH=/home/obppayco/laravel-project
-
-    # Pull latest code
+    # 1. Pull latest code from GitHub
     - /usr/local/cpanel/3rdparty/bin/git pull
 
-    # Install vendor packages
-    - /opt/cpanel/composer/bin/composer install --no-dev --optimize-autoloader
+    # 2. Ensure public_html exists
+    - mkdir -p /home/obppayco/public_html
 
-    # Set permissions
-    - chmod -R 775 storage bootstrap/cache
+    # 3. Sync updated public assets to public_html
+    # Keeps Laravel's .htaccess intact
+    - rsync -av --exclude='.htaccess' /home/obppayco/laravel-project/public/ /home/obppayco/public_html/
 
-    # Laravel optimization
-    - php artisan migrate --force
-    - php artisan optimize:clear
-    - php artisan config:cache
-    - php artisan route:cache
-    - php artisan view:cache
+    # 4. Ensure index.php always points to Laravel project
+    - sed -i "s|__DIR__.'/../vendor/autoload.php'|__DIR__.'/../laravel-project/vendor/autoload.php'|g" /home/obppayco/public_html/index.php
+    - sed -i "s|__DIR__.'/../bootstrap/app.php'|__DIR__.'/../laravel-project/bootstrap/app.php'|g" /home/obppayco/public_html/index.php
+
+    # 5. Clear all Laravel caches
+    - rm -f /home/obppayco/laravel-project/bootstrap/cache/config.php
+    - rm -f /home/obppayco/laravel-project/bootstrap/cache/packages.php
+    - rm -rf /home/obppayco/laravel-project/storage/framework/views/*
